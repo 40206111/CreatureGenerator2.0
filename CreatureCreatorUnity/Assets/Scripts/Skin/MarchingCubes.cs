@@ -22,6 +22,11 @@ public class MarchingCubes
 
     static bool CaseFound(bool[] currentCase, CubeData cube)
     {
+        if (InSpherePoints(currentCase) != cube.InSpherePoints)
+        {
+            return false;
+        }
+
         var points = cube.Data;
 
         for (int i = 0; i < points.Length; ++i)
@@ -33,5 +38,15 @@ public class MarchingCubes
         }
 
         return true;
+    }
+
+    static int InSpherePoints(bool[] currentcase)
+    {
+        int counter = 0;
+        for (int i = 0; i < currentcase.Length; i++)
+        {
+            counter = currentcase[i] ? counter++ : counter;
+        }
+        return counter;
     }
 }

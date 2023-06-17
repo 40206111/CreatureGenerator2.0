@@ -5,16 +5,16 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TheCubes : MonoBehaviour
 {
-    static CubeData TestCube = new CubeData(new PointData[]
+    static readonly CubeData TestCube = new CubeData(new PointData[]
     {
-        new PointData(new Vector3(0, 0, 0), false),
-        new PointData(new Vector3(1, 0, 0), false),
-        new PointData(new Vector3(0, 0, 1), false),
-        new PointData(new Vector3(1, 0, 1), false),
-        new PointData(new Vector3(0, 1, 0), false),
-        new PointData(new Vector3(1, 1, 0), false),
-        new PointData(new Vector3(0, 1, 1), false),
-        new PointData(new Vector3(1, 1, 1), false)
+        new PointData(CubeData.NormalisedCube[0], false),
+        new PointData(CubeData.NormalisedCube[1], false),
+        new PointData(CubeData.NormalisedCube[2], false),
+        new PointData(CubeData.NormalisedCube[3], false),
+        new PointData(CubeData.NormalisedCube[4], false),
+        new PointData(CubeData.NormalisedCube[5], false),
+        new PointData(CubeData.NormalisedCube[6], false),
+        new PointData(CubeData.NormalisedCube[7], false)
     });
 
     [SerializeField, Range(0, 14)] int CurrentCube = 0;
