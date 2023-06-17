@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
-public class TheCubes : MonoBehaviour
+[RequireComponent(typeof(MeshFilter))]
+public class AltTestCubes : MonoBehaviour
 {
     static CubeData TestCube = new CubeData(new PointData[]
     {
@@ -80,6 +80,13 @@ public class TheCubes : MonoBehaviour
             var point = TestCube.Data[i];
             Gizmos.color = point.IsInSphere ? Color.green : Color.black;
             Gizmos.DrawSphere(transform.position + point.Position, 0.1f);
+        }
+
+        var verts = TestCube.GetTriangleVerts();
+        for (int i = 0; i < verts.Count; ++i)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(transform.position + verts[i], 0.1f);
         }
     }
 }
