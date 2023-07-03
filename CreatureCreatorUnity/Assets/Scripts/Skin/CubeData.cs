@@ -53,7 +53,6 @@ public class CubeData
         {
             var dirVector = b.Position - a.Position;
             TriangleVerts.Add(a.Position + (0.5f * dirVector));
-            }
         }
     }
 }
