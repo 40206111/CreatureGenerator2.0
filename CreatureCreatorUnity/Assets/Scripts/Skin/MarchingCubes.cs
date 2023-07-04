@@ -7,17 +7,7 @@ public class MarchingCubes
 
     public static MeshData GetMeshDataForCube(CubeData cube)
     {
-        for (int i = 0; i < MarchingCubesData.Cases.Length; ++i)
-        {
-            var currentCase = MarchingCubesData.Cases[i];
-            if (CaseFound(currentCase, cube))
-            {
-                return MarchingCubesData.CaseMeshData[i];
-            }
-        }
-
-        Debug.LogError("[MarchingCubes.cs] No Pattern match for cube");
-        return MarchingCubesData.CaseMeshData[0];
+        return null;
     }
 
     static bool CaseFound(bool[] currentCase, CubeData cube)

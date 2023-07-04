@@ -7,14 +7,14 @@ public class TheCubes : MonoBehaviour
 {
     static CubeData TestCube = new CubeData(new PointData[]
     {
-        new PointData(new Vector3(0, 0, 0), false),
-        new PointData(new Vector3(1, 0, 0), false),
-        new PointData(new Vector3(0, 0, 1), false),
-        new PointData(new Vector3(1, 0, 1), false),
-        new PointData(new Vector3(0, 1, 0), false),
-        new PointData(new Vector3(1, 1, 0), false),
-        new PointData(new Vector3(0, 1, 1), false),
-        new PointData(new Vector3(1, 1, 1), false)
+        new PointData(new Vector3(0, 0, 1), false), //0
+        new PointData(new Vector3(1, 0, 1), false), //1
+        new PointData(new Vector3(1, 0, 0), false), //2
+        new PointData(new Vector3(0, 0, 0), false), //3
+        new PointData(new Vector3(0, 1, 1), false), //4
+        new PointData(new Vector3(1, 1, 1), false), //5
+        new PointData(new Vector3(1, 1, 0), false), //6
+        new PointData(new Vector3(0, 1, 0), false)  //7
     });
 
     [SerializeField, Range(0, 14)] int CurrentCube = 0;
