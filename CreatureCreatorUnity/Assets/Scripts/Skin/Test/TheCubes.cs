@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TheCubes : MonoBehaviour
 {
-    static CubeData TestCube = new CubeData(new PointData[]
+    protected CubeData TestCube = new CubeData(new PointData[]
     {
         new PointData(new Vector3(0, 0, 1), false), //0
         new PointData(new Vector3(1, 0, 1), false), //1
@@ -17,8 +17,8 @@ public class TheCubes : MonoBehaviour
         new PointData(new Vector3(0, 1, 0), false)  //7
     });
 
-    [SerializeField, Range(0, 14)] int CurrentCube = 0;
-    int LastCube = 0;
+    [SerializeField, Range(0, 14)] protected int CurrentCube = 0;
+    protected int LastCube = 0;
 
     Mesh TheMesh;
 
@@ -38,7 +38,7 @@ public class TheCubes : MonoBehaviour
         }
     }
 
-    void UpdateCube()
+    protected virtual void UpdateCube()
     {
         LastCube = CurrentCube;
         var thisCase = MarchingCubesData.Cases[LastCube];
@@ -65,7 +65,7 @@ public class TheCubes : MonoBehaviour
     }
 
 
-    private void OnDrawGizmos()
+    protected virtual void OnDrawGizmos()
     {
         if (!Application.isPlaying)
         {
@@ -80,6 +80,13 @@ public class TheCubes : MonoBehaviour
             var point = TestCube.Data[i];
             Gizmos.color = point.IsInSphere ? Color.green : Color.black;
             Gizmos.DrawSphere(transform.position + point.Position, 0.1f);
+        }
+
+        var verts = TestCube.GetTriangleVerts();
+        for (int i = 0; i < verts.Count; ++i)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(transform.position + verts[i], 0.1f);
         }
     }
 }
