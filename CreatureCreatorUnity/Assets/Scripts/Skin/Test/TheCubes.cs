@@ -79,6 +79,8 @@ public class TheCubes : MonoBehaviour
         {
             var point = TestCube.Data[i];
             Gizmos.color = point.IsInSphere ? Color.green : Color.black;
+            Gizmos.color = point.IsInSphere && i == 5 ? Color.cyan : Gizmos.color;
+            Gizmos.color = !point.IsInSphere && i == 5 ? Color.gray : Gizmos.color;
             Gizmos.DrawSphere(transform.position + point.Position, 0.1f);
         }
 
