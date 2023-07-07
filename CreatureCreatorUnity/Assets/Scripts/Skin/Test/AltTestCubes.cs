@@ -3,90 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
-public class AltTestCubes : MonoBehaviour
+public class AltTestCubes : TheCubes
 {
-    static CubeData TestCube = new CubeData(new PointData[]
+    [SerializeField, Range(0, 255)] protected int AltCurrentCube = 0;
+
+    protected override void UpdateCube()
     {
-        new PointData(new Vector3(0, 0, 0), false),
-        new PointData(new Vector3(1, 0, 0), false),
-        new PointData(new Vector3(0, 0, 1), false),
-        new PointData(new Vector3(1, 0, 1), false),
-        new PointData(new Vector3(0, 1, 0), false),
-        new PointData(new Vector3(1, 1, 0), false),
-        new PointData(new Vector3(0, 1, 1), false),
-        new PointData(new Vector3(1, 1, 1), false)
-    });
-
-    [SerializeField, Range(0, 14)] int CurrentCube = 0;
-    int LastCube = 0;
-
-    Mesh TheMesh;
-
-    private void Awake()
-    {
-        TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
-        TheMesh.name = "Skin";
-        UpdateMesh();
+        LastCube = AltCurrentCube;
+        TestCube.Data[0].IsInSphere = (AltCurrentCube & 1) == 1;
+        TestCube.Data[1].IsInSphere = (AltCurrentCube & 2) == 2;
+        TestCube.Data[2].IsInSphere = (AltCurrentCube & 4) == 4;
+        TestCube.Data[3].IsInSphere = (AltCurrentCube & 8) == 8;
+        TestCube.Data[4].IsInSphere = (AltCurrentCube & 16) == 16;
+        TestCube.Data[5].IsInSphere = (AltCurrentCube & 32) == 32;
+        TestCube.Data[6].IsInSphere = (AltCurrentCube & 64) == 64;
+        TestCube.Data[7].IsInSphere = (AltCurrentCube & 128) == 128;
     }
 
-    private void Update()
+    protected override void OnDrawGizmos()
     {
-        if (CurrentCube != LastCube)
-        {
-            UpdateCube();
-            UpdateMesh();
-        }
-    }
-
-    void UpdateCube()
-    {
-        LastCube = CurrentCube;
-        var thisCase = MarchingCubesData.Cases[LastCube];
-
-        for (int i = 0; i < TestCube.Data.Length; ++i)
-        {
-            TestCube.Data[i].IsInSphere = thisCase[i];
-        }
-    }
-
-    void UpdateMesh()
-    {
-        var meshData = MarchingCubes.GetMeshDataForCube(TestCube);
-        TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
-        if (meshData.Vertices.Count > 0)
-        {
-            TheMesh.vertices = new Vector3[meshData.Vertices.Count];
-            TheMesh.vertices = meshData.Vertices.ToArray();
-            TheMesh.triangles = new int[meshData.Triangles.Count];
-            TheMesh.triangles = meshData.Triangles.ToArray();
-        }
-        TheMesh.RecalculateNormals();
-        TheMesh.name = $"Skin{CurrentCube}";
-    }
-
-
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying)
-        {
-            if (CurrentCube != LastCube)
-            {
-                UpdateCube();
-                UpdateMesh();
-            }
-        }
-        for (int i = 0; i < TestCube.Data.Length; ++i)
-        {
-            var point = TestCube.Data[i];
-            Gizmos.color = point.IsInSphere ? Color.green : Color.black;
-            Gizmos.DrawSphere(transform.position + point.Position, 0.1f);
-        }
-
-        var verts = TestCube.GetTriangleVerts();
-        for (int i = 0; i < verts.Count; ++i)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawSphere(transform.position + verts[i], 0.1f);
-        }
+        CurrentCube = AltCurrentCube;
+        base.OnDrawGizmos();
     }
 }
