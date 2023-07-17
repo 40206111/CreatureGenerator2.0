@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //place on gameobject to test a single point with the marching cubes stuff
+[RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TestSingle : MonoBehaviour
 {
     [SerializeField]
@@ -10,34 +11,56 @@ public class TestSingle : MonoBehaviour
     [SerializeField]
     float GridDivisions;
 
-    SkeletonPointData SkelePoint = new SkeletonPointData();
+    Skeleton SkeleBones = new Skeleton(new SkeletonPointData());
 
-    List<Vector3> GridPoints = new List<Vector3>(); //temp
+    Mesh TheMesh;
+
+    List<PointData> GridPoints = new List<PointData>();
+
+    private void Awake()
+    {
+        TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
+        TheMesh.name = "Skin";
+        UpdateMesh();
+    }
 
     void Update()
     {
-        if(SkelePoint.Position != transform.position)
+        var skelePoint = SkeleBones.SkelePoints[0];
+        if(skelePoint.Position != transform.position)
         {
-            SkelePoint.Position = transform.position;
+            skelePoint.Position = transform.position;
             UpdateMesh();
         }
 
-        if (SkelePoint.Radius != Radius)
+        if (skelePoint.Radius != Radius)
         {
-            SkelePoint.Radius = Radius;
+            skelePoint.Radius = Radius;
             UpdateMesh();
         }
 
-        if(GridDivisions != MarchingCubes.GridDivisions)
+        if(GridDivisions != SkeleBones.TestGetDivisions())
         {
-            MarchingCubes.GridDivisions = GridDivisions;
+            SkeleBones.TestUpdateGridDivisions(GridDivisions);
             UpdateMesh();
         }
+        SkeleBones.SkelePoints[0] = skelePoint;
     }
 
     void UpdateMesh()
     {
-        GridPoints = MarchingCubes.GenerateGridFromPoint(SkelePoint);
+        SkeleBones.MakeMyMesh();
+        TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
+        var meshData = SkeleBones.SkeleMesh;
+        if (meshData.Vertices.Count > 0)
+        {
+            TheMesh.vertices = new Vector3[meshData.Vertices.Count];
+            TheMesh.vertices = meshData.Vertices.ToArray();
+            TheMesh.triangles = new int[meshData.Triangles.Count];
+            TheMesh.triangles = meshData.Triangles.ToArray();
+        }
+        TheMesh.RecalculateNormals();
+        TheMesh.name = $"SkinTestSingle";
     }
 
     protected virtual void OnDrawGizmos()
@@ -47,32 +70,35 @@ public class TestSingle : MonoBehaviour
             Update();
         }
 
+
         for (int i = 0; i < GridPoints.Count; ++i)
         {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawSphere(GridPoints[i], 0.1f);
+            var point = GridPoints[i];
+            Gizmos.color = point.IsInSphere ? Color.green : Color.black;
+            Gizmos.color = point.IsInSphere && i == 5 ? Color.cyan : Gizmos.color;
+            Gizmos.color = !point.IsInSphere && i == 5 ? Color.gray : Gizmos.color;
+            Gizmos.DrawSphere(transform.position + point.Position, 0.1f);
         }
 
-        //X
         Gizmos.color = Color.red;
-        Vector3 endPosX = SkelePoint.Position;
+        Vector3 endPosX = transform.position;
         endPosX.x -= Radius;
-        Gizmos.DrawLine(SkelePoint.Position, endPosX);
+        Gizmos.DrawLine(transform.position, endPosX);
         //Y
         Gizmos.color = Color.green;
-        Vector3 endPosY = SkelePoint.Position;
+        Vector3 endPosY = transform.position;
         endPosY.y -= Radius;
-        Gizmos.DrawLine(SkelePoint.Position, endPosY);
+        Gizmos.DrawLine(transform.position, endPosY);
         //Z
         Gizmos.color = Color.blue;
-        Vector3 endPosZ = SkelePoint.Position;
+        Vector3 endPosZ = transform.position;
         endPosZ.z -= Radius;
-        Gizmos.DrawLine(SkelePoint.Position, endPosZ);
+        Gizmos.DrawLine(transform.position, endPosZ);
 
         Gizmos.color = Color.grey;
         float diameter = Radius * 2f;
-        Gizmos.DrawWireCube(SkelePoint.Position, new Vector3(diameter, diameter, diameter));
+        Gizmos.DrawWireCube(transform.position, new Vector3(diameter, diameter, diameter));
 
-        Gizmos.DrawWireSphere(SkelePoint.Position, Radius);
+        Gizmos.DrawWireSphere(transform.position, Radius);
     }
 }

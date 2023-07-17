@@ -2,19 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System.Threading.Tasks;
 
 public class MarchingCubes 
 {
-    public static float GridDivisions = 1f; //this should not stay here
+    public float GridDivisions = 1f; //this should not stay here
 
-    public static MeshData GenerateMeshFromSkeleton(SkeletonPointData data /*this will be full skeleton later*/)
+    public MeshData GenerateMeshFromSkeleton(Skeleton data)
     {
-
-
-        return null;
+        var meshData = new MeshData();
+        for (int i = 0; i < data.SkelePoints.Count; ++i)
+        {
+            var newData = GenerateGridFromPoint(data.SkelePoints[i]);
+            meshData.Triangles.AddRange(newData.Triangles);
+            meshData.Vertices.AddRange(newData.Vertices);
+        }
+        //FixVertices(ref meshData.Vertices, ref meshData.Triangles);
+        return meshData;
     }
 
-    public static  List<Vector3> GenerateGridFromPoint(SkeletonPointData point)
+    public MeshData GenerateGridFromPoint(SkeletonPointData point)
     {
         var pos = point.Position;
         var rad = point.Radius;
@@ -33,40 +40,53 @@ public class MarchingCubes
         int cubeSideLenX = (int)((endPoint.x - startPoint.x) / GridDivisions);
         int cubeSideLenY = (int)((endPoint.y - startPoint.y) / GridDivisions);
         int cubeSideLenZ = (int)((endPoint.z - startPoint.z) / GridDivisions);
-        var output = new List<Vector3>();
 
-        float minPercent = 0.2f;
-        float MaxPercent = 1 - minPercent;
+        var meshData = new MeshData();
 
-        float midXMin = minPercent * cubeSideLenX;
-        float midXMax = MaxPercent * cubeSideLenX;
-        float midYMin = minPercent * cubeSideLenY;
-        float midYMax = MaxPercent * cubeSideLenY;
-        float midZMin = minPercent * cubeSideLenZ;
-        float midZMax = MaxPercent * cubeSideLenZ;
-
-        for (int x = 0; x <= cubeSideLenX; ++x)
+        for (int x = 0; x < cubeSideLenX; ++x)
         {
-            for (int y = 0; y <= cubeSideLenY; ++y)
+            for (int y = 0; y < cubeSideLenY; ++y)
             {
-                for (int z = 0; z <= cubeSideLenZ; ++z)
+                for (int z = 0; z < cubeSideLenZ; ++z)
                 {
-                    if (x > midXMin && x < midXMax &&
-                        y > midYMin && y < midYMax &&
-                        z > midZMin && z < midZMax)
-                    {
-                        continue;
-                    }
-                    var neVec = new Vector3(startPoint.x + GridDivisions * x, startPoint.y + GridDivisions * y, startPoint.z + GridDivisions * z);
-                    output.Add(neVec);
+                    //Task.Run(() => MakeGridCube(startPoint, point, data));
+                    var newData = MakeGridCube(startPoint, point);
+                    meshData.Triangles.AddRange(newData.Triangles);
+                    meshData.Vertices.AddRange(newData.Vertices);
                 }
             }
         }
 
-        return output;
+        return meshData;
     }
 
-    public static MeshData GetMeshDataForCube(CubeData cube)
+    MeshData MakeGridCube(Vector3 startingPoint, SkeletonPointData point)
+    {
+        float x = startingPoint.x;
+        float y = startingPoint.y;
+        float z = startingPoint.z;
+        PointData[] data = new PointData[]
+        {
+        new PointData(new Vector3(x, y, z + GridDivisions), false), //0
+        new PointData(new Vector3(x + GridDivisions, y, z + GridDivisions), false), //1
+        new PointData(new Vector3(x + GridDivisions, y, z), false), //2
+        new PointData(startingPoint, false), //3
+        new PointData(new Vector3(x, y + GridDivisions, z + GridDivisions), false), //4
+        new PointData(new Vector3(x + GridDivisions, y + GridDivisions, z + GridDivisions), false), //5
+        new PointData(new Vector3(x + GridDivisions, y + GridDivisions, z), false), //6
+        new PointData(new Vector3(x, y + GridDivisions, z), false)  //7
+        };
+
+        for (int i = 0; i < data.Length; ++i)
+        {
+            data[i].IsInSphere = (data[i].Position - point.Position).magnitude < point.Radius;
+        }
+
+        CubeData cube = new CubeData(data);
+        return GetMeshDataForCube(cube);
+    }
+
+    public MeshData GetMeshDataForCube(CubeData cube)
     {
         int TrianglesIndex = 0;
         TrianglesIndex = cube.Data[0].IsInSphere ? TrianglesIndex | 1 : TrianglesIndex;
@@ -79,12 +99,12 @@ public class MarchingCubes
         TrianglesIndex = cube.Data[7].IsInSphere ? TrianglesIndex | 128 : TrianglesIndex;
         var triangles = new List<int>(MarchingCubesData.Triangles[TrianglesIndex]);
         var vertices = new List<Vector3>();
-        FixVertices(ref vertices, ref triangles);
+        //FixVertices(ref vertices, ref triangles);
         MeshData output = new MeshData(vertices, triangles);
         return output;
     }
 
-    static void FixVertices(ref List<Vector3> vertices, ref List<int> triangles)
+    public void FixVertices(ref List<Vector3> vertices, ref List<int> triangles)
     {
         Dictionary<Vector3, int> outputDic = new Dictionary<Vector3, int>();
 
@@ -102,20 +122,5 @@ public class MarchingCubes
                 triangles[i] = outputDic[vector];
             }
         }
-    }
-
-    static bool CaseFound(bool[] currentCase, CubeData cube)
-    {
-        var points = cube.Data;
-
-        for (int i = 0; i < points.Length; ++i)
-        {
-            if (currentCase[i] != points[i].IsInSphere)
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
