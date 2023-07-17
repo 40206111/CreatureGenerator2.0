@@ -17,8 +17,31 @@ public class MarchingCubes
         TrianglesIndex = cube.Data[5].IsInSphere ? TrianglesIndex | 32 : TrianglesIndex;
         TrianglesIndex = cube.Data[6].IsInSphere ? TrianglesIndex | 64 : TrianglesIndex;
         TrianglesIndex = cube.Data[7].IsInSphere ? TrianglesIndex | 128 : TrianglesIndex;
-        MeshData output = new MeshData(MarchingCubesData.EdgeCentres.ToList(), MarchingCubesData.Triangles[TrianglesIndex]);
+        var triangles = new List<int>(MarchingCubesData.Triangles[TrianglesIndex]);
+        var vertices = new List<Vector3>();
+        FixVertices(ref vertices, ref triangles);
+        MeshData output = new MeshData(vertices, triangles);
         return output;
+    }
+
+    static void FixVertices(ref List<Vector3> vertices, ref List<int> triangles)
+    {
+        Dictionary<Vector3, int> outputDic = new Dictionary<Vector3, int>();
+
+        for(int i = 0; i < triangles.Count; ++i)
+        {
+            var vector = MarchingCubesData.EdgeCentres[triangles[i]];
+            if (outputDic.ContainsKey(vector))
+            {
+                triangles[i] = outputDic[vector];
+            }
+            else
+            {
+                vertices.Add(vector);
+                outputDic.Add(vector, vertices.Count - 1);
+                triangles[i] = outputDic[vector];
+            }
+        }
     }
 
     static bool CaseFound(bool[] currentCase, CubeData cube)
