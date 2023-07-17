@@ -35,20 +35,34 @@ public class MarchingCubes
         int cubeSideLenZ = (int)((endPoint.z - startPoint.z) / GridDivisions);
         var output = new List<Vector3>();
 
+        float minPercent = 0.2f;
+        float MaxPercent = 1 - minPercent;
+
+        float midXMin = minPercent * cubeSideLenX;
+        float midXMax = MaxPercent * cubeSideLenX;
+        float midYMin = minPercent * cubeSideLenY;
+        float midYMax = MaxPercent * cubeSideLenY;
+        float midZMin = minPercent * cubeSideLenZ;
+        float midZMax = MaxPercent * cubeSideLenZ;
+
         for (int x = 0; x <= cubeSideLenX; ++x)
         {
             for (int y = 0; y <= cubeSideLenY; ++y)
             {
                 for (int z = 0; z <= cubeSideLenZ; ++z)
                 {
+                    if (x > midXMin && x < midXMax &&
+                        y > midYMin && y < midYMax &&
+                        z > midZMin && z < midZMax)
+                    {
+                        continue;
+                    }
                     var neVec = new Vector3(startPoint.x + GridDivisions * x, startPoint.y + GridDivisions * y, startPoint.z + GridDivisions * z);
                     output.Add(neVec);
                 }
             }
         }
 
-        //output.Add(startPoint);
-        //output.Add(endPoint);
         return output;
     }
 
