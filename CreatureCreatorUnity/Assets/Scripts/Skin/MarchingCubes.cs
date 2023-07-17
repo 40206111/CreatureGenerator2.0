@@ -5,6 +5,52 @@ using UnityEngine;
 
 public class MarchingCubes 
 {
+    public static float GridDivisions = 1f; //this should not stay here
+
+    public static MeshData GenerateMeshFromSkeleton(SkeletonPointData data /*this will be full skeleton later*/)
+    {
+
+
+        return null;
+    }
+
+    public static  List<Vector3> GenerateGridFromPoint(SkeletonPointData point)
+    {
+        var pos = point.Position;
+        var rad = point.Radius;
+        Vector3 startPoint = new Vector3(pos.x - rad, pos.y - rad, pos.z - rad);
+        float divisionsPerUnit = 1f / GridDivisions;
+        startPoint.x = Mathf.Floor(divisionsPerUnit * startPoint.x) / divisionsPerUnit;
+        startPoint.y = Mathf.Floor(divisionsPerUnit * startPoint.y) / divisionsPerUnit;
+        startPoint.z = Mathf.Floor(divisionsPerUnit * startPoint.z) / divisionsPerUnit;
+
+
+        Vector3 endPoint = new Vector3(pos.x + rad, pos.y + rad, pos.z + rad);
+        endPoint.x = Mathf.Ceil(divisionsPerUnit * endPoint.x) / divisionsPerUnit;
+        endPoint.y = Mathf.Ceil(divisionsPerUnit * endPoint.y) / divisionsPerUnit;
+        endPoint.z = Mathf.Ceil(divisionsPerUnit * endPoint.z) / divisionsPerUnit;
+
+        int cubeSideLenX = (int)((endPoint.x - startPoint.x) / GridDivisions);
+        int cubeSideLenY = (int)((endPoint.y - startPoint.y) / GridDivisions);
+        int cubeSideLenZ = (int)((endPoint.z - startPoint.z) / GridDivisions);
+        var output = new List<Vector3>();
+
+        for (int x = 0; x <= cubeSideLenX; ++x)
+        {
+            for (int y = 0; y <= cubeSideLenY; ++y)
+            {
+                for (int z = 0; z <= cubeSideLenZ; ++z)
+                {
+                    var neVec = new Vector3(startPoint.x + GridDivisions * x, startPoint.y + GridDivisions * y, startPoint.z + GridDivisions * z);
+                    output.Add(neVec);
+                }
+            }
+        }
+
+        //output.Add(startPoint);
+        //output.Add(endPoint);
+        return output;
+    }
 
     public static MeshData GetMeshDataForCube(CubeData cube)
     {

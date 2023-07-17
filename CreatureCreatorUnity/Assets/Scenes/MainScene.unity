@@ -123,7 +123,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!43 &362417622
+--- !u!43 &446403437
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,7 +138,7 @@ Mesh:
     topology: 0
     baseVertex: 0
     firstVertex: 0
-    vertexCount: 9
+    vertexCount: 3
     localAABB:
       m_Center: {x: 0.25, y: 0.25, z: 0.75}
       m_Extent: {x: 0.25, y: 0.25, z: 0.25}
@@ -158,10 +158,10 @@ Mesh:
   m_KeepVertices: 1
   m_KeepIndices: 1
   m_IndexFormat: 0
-  m_IndexBuffer: 080000000300
+  m_IndexBuffer: 000001000200
   m_VertexData:
     serializedVersion: 3
-    m_VertexCount: 12
+    m_VertexCount: 3
     m_Channels:
     - stream: 0
       offset: 0
@@ -219,8 +219,8 @@ Mesh:
       offset: 0
       format: 0
       dimension: 0
-    m_DataSize: 288
-    _typelessdata: 0000003f000000000000803f3acd133f3acd133f3acd13bf0000803f000000000000003f0000000000000000000000000000003f000000000000000000000000000000000000000000000000000000000000003f3acd133f3acd133f3acd13bf0000003f0000803f0000803f0000000000000000000000000000803f0000803f0000003f0000000000000000000000000000003f0000803f00000000000000000000000000000000000000000000803f0000003f000000000000000000000000000000000000003f0000803f3acd133f3acd133f3acd13bf0000803f0000003f0000803f0000000000000000000000000000803f0000003f00000000000000000000000000000000000000000000003f00000000000000000000000000000000
+    m_DataSize: 72
+    _typelessdata: 000000000000003f0000803f3acd133f3acd133f3acd13bf0000003f000000000000803f3acd133f3acd133f3acd13bf00000000000000000000003f3acd133f3acd133f3acd13bf
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
@@ -287,6 +287,51 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &1293249288
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1293249290}
+  - component: {fileID: 1293249289}
+  m_Layer: 0
+  m_Name: SingleSkele
+  m_TagString: Untagged
+  m_Icon: {fileID: 2488908585195742037, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1293249289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293249288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e79917f3ad6b703478803e2e2b4a3aac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Radius: 0.8
+  GridDivisions: 0.8
+--- !u!4 &1293249290
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1293249288}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.81, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1579249411
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,7 +350,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &1579249412
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -482,6 +527,7 @@ Mesh:
     m_DataSize: 0
     _typelessdata: 
   m_CompressedMesh:
+    m_Vertices:
       m_NumItems: 0
       m_Range: 0
       m_Start: 0
@@ -564,7 +610,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1725003705
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,7 +645,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1725003704}
-  m_Mesh: {fileID: 362417622}
+  m_Mesh: {fileID: 446403437}
 --- !u!23 &1725003708
 MeshRenderer:
   m_ObjectHideFlags: 0
