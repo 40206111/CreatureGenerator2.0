@@ -15,8 +15,6 @@ public class TestSingle : MonoBehaviour
 
     Mesh TheMesh;
 
-    List<PointData> GridPoints = new List<PointData>();
-
     private void Awake()
     {
         TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
@@ -70,15 +68,6 @@ public class TestSingle : MonoBehaviour
             Update();
         }
 
-
-        for (int i = 0; i < GridPoints.Count; ++i)
-        {
-            var point = GridPoints[i];
-            Gizmos.color = point.IsInSphere ? Color.green : Color.black;
-            Gizmos.color = point.IsInSphere && i == 5 ? Color.cyan : Gizmos.color;
-            Gizmos.color = !point.IsInSphere && i == 5 ? Color.gray : Gizmos.color;
-            Gizmos.DrawSphere(transform.position + point.Position, 0.1f);
-        }
 
         Gizmos.color = Color.red;
         Vector3 endPosX = transform.position;

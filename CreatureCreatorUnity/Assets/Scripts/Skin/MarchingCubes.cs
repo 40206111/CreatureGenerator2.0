@@ -14,7 +14,11 @@ public class MarchingCubes
         for (int i = 0; i < data.SkelePoints.Count; ++i)
         {
             var newData = GenerateGridFromPoint(data.SkelePoints[i]);
-            meshData.Triangles.AddRange(newData.Triangles);
+            int curVertLen = Mathf.Max(meshData.Vertices.Count - 1, 0);
+            for (int j = 0; j < newData.Triangles.Count; ++j)
+            {
+                meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
+            }
             meshData.Vertices.AddRange(newData.Vertices);
         }
         //FixVertices(ref meshData.Vertices, ref meshData.Triangles);
@@ -49,9 +53,15 @@ public class MarchingCubes
             {
                 for (int z = 0; z < cubeSideLenZ; ++z)
                 {
+                    Vector3 cubeOrigin = new Vector3(x, y, z);
+                    cubeOrigin = startPoint + cubeOrigin;
                     //Task.Run(() => MakeGridCube(startPoint, point, data));
-                    var newData = MakeGridCube(startPoint, point);
-                    meshData.Triangles.AddRange(newData.Triangles);
+                    var newData = MakeGridCube(cubeOrigin, point);
+                    int curVertLen = meshData.Vertices.Count;
+                    for (int j = 0; j < newData.Triangles.Count; ++j)
+                    {
+                        meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
+                    }
                     meshData.Vertices.AddRange(newData.Vertices);
                 }
             }
@@ -98,9 +108,22 @@ public class MarchingCubes
         TrianglesIndex = cube.Data[6].IsInSphere ? TrianglesIndex | 64 : TrianglesIndex;
         TrianglesIndex = cube.Data[7].IsInSphere ? TrianglesIndex | 128 : TrianglesIndex;
         var triangles = new List<int>(MarchingCubesData.Triangles[TrianglesIndex]);
-        var vertices = new List<Vector3>();
+        var vertices = GetVerticesModifiedByPosition(cube);
         //FixVertices(ref vertices, ref triangles);
         MeshData output = new MeshData(vertices, triangles);
+        return output;
+    }
+
+    List<Vector3> GetVerticesModifiedByPosition(CubeData cube)
+    {
+        List<Vector3> output = new List<Vector3>();
+        for (int i = 0; i < MarchingCubesData.EdgeCentres.Length; ++i)
+        {
+            var vertex = MarchingCubesData.EdgeCentres[i];
+            vertex *= GridDivisions;
+            vertex += cube.Data[3].Position;
+            output.Add(vertex);
+        }
         return output;
     }
 
