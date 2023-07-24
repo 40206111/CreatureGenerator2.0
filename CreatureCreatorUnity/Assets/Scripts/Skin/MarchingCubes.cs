@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using System.Threading.Tasks;
 
-public class MarchingCubes 
+public class MarchingCubes
 {
     public float GridDivisions = 1f; //this should not stay here
 
@@ -15,9 +15,16 @@ public class MarchingCubes
         {
             var newData = GenerateGridFromPoint(data.SkelePoints[i]);
             int curVertLen = Mathf.Max(meshData.Vertices.Count - 1, 0);
-            for (int j = 0; j < newData.Triangles.Count; ++j)
+            if (curVertLen == 0)
             {
-                meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
+                meshData.Triangles.AddRange(newData.Triangles);
+            }
+            else
+            {
+                for (int j = 0; j < newData.Triangles.Count; ++j)
+                {
+                    meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
+                }
             }
             meshData.Vertices.AddRange(newData.Vertices);
         }
@@ -27,19 +34,31 @@ public class MarchingCubes
 
     public MeshData GenerateGridFromPoint(SkeletonPointData point)
     {
-        var pos = point.Position;
-        var rad = point.Radius;
+        if (TimDebugsThings.Instance != null)
+        {
+            TimDebugsThings.Instance.ClearVisuals();
+        }
+        Vector3 pos = point.Position;
+        float rad = point.Radius;
         Vector3 startPoint = new Vector3(pos.x - rad, pos.y - rad, pos.z - rad);
         float divisionsPerUnit = 1f / GridDivisions;
+        Vector3 gridVec = new Vector3(GridDivisions, GridDivisions, GridDivisions);
         startPoint.x = Mathf.Floor(divisionsPerUnit * startPoint.x) / divisionsPerUnit;
         startPoint.y = Mathf.Floor(divisionsPerUnit * startPoint.y) / divisionsPerUnit;
         startPoint.z = Mathf.Floor(divisionsPerUnit * startPoint.z) / divisionsPerUnit;
 
+        startPoint -= gridVec;
 
         Vector3 endPoint = new Vector3(pos.x + rad, pos.y + rad, pos.z + rad);
         endPoint.x = Mathf.Ceil(divisionsPerUnit * endPoint.x) / divisionsPerUnit;
         endPoint.y = Mathf.Ceil(divisionsPerUnit * endPoint.y) / divisionsPerUnit;
         endPoint.z = Mathf.Ceil(divisionsPerUnit * endPoint.z) / divisionsPerUnit;
+
+        endPoint += gridVec;
+        if (TimDebugsThings.Instance != null)
+        {
+            TimDebugsThings.Instance.VisualStartEndPoint(startPoint, endPoint);
+        }
 
         int cubeSideLenX = (int)((endPoint.x - startPoint.x) / GridDivisions);
         int cubeSideLenY = (int)((endPoint.y - startPoint.y) / GridDivisions);
@@ -53,16 +72,23 @@ public class MarchingCubes
             {
                 for (int z = 0; z < cubeSideLenZ; ++z)
                 {
-                    Vector3 cubeOrigin = new Vector3(x, y, z);
+                    Vector3 cubeOrigin = new Vector3(x, y, z) * GridDivisions;
                     cubeOrigin = startPoint + cubeOrigin;
+                    float halfDiv = GridDivisions * 0.5f;
+                    //float dist = ((cubeOrigin + new Vector3(halfDiv, halfDiv, halfDiv)) - point.Position).magnitude;
+                    //if (dist < rad * 0.5f)
+                    //{
+                    //    //z = Mathf.FloorToInt(z + (cubeSideLenZ * 0.1f));
+                    //    continue;
+                    //}
+                    //if (dist > rad * 1.7f)
+                    //{
+                    //    continue;
+                    //}
                     //Task.Run(() => MakeGridCube(startPoint, point, data));
                     var newData = MakeGridCube(cubeOrigin, point);
                     int curVertLen = meshData.Vertices.Count;
-                    for (int j = 0; j < newData.Triangles.Count; ++j)
-                    {
-                        meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
-                    }
-                    meshData.Vertices.AddRange(newData.Vertices);
+                    AddTriangles(ref meshData, newData.Triangles, newData.Vertices);
                 }
             }
         }
@@ -89,10 +115,14 @@ public class MarchingCubes
 
         for (int i = 0; i < data.Length; ++i)
         {
-            data[i].IsInSphere = (data[i].Position - point.Position).magnitude < point.Radius;
+            data[i].IsInSphere = (data[i].Position - point.Position).magnitude + GridDivisions * 0.1f <= point.Radius;
         }
 
         CubeData cube = new CubeData(data);
+        if (TimDebugsThings.Instance != null)
+        {
+            TimDebugsThings.Instance.VisualUpdateCube(cube);
+        }
         return GetMeshDataForCube(cube);
     }
 
@@ -127,11 +157,24 @@ public class MarchingCubes
         return output;
     }
 
+    public void AddTriangles(ref MeshData data, List<int> triangles, List<Vector3> vertices)
+    {
+        for (int i = 0; i < triangles.Count; ++i)
+        {
+            var vector = vertices[triangles[i]];
+            if (!data.Vertices.Contains(vector))
+            {
+                data.Vertices.Add(vector);
+            }
+            data.Triangles.Add(data.Vertices.IndexOf(vector));
+        }
+    }
+
     public void FixVertices(ref List<Vector3> vertices, ref List<int> triangles)
     {
         Dictionary<Vector3, int> outputDic = new Dictionary<Vector3, int>();
 
-        for(int i = 0; i < triangles.Count; ++i)
+        for (int i = 0; i < triangles.Count; ++i)
         {
             var vector = MarchingCubesData.EdgeCentres[triangles[i]];
             if (outputDic.ContainsKey(vector))
