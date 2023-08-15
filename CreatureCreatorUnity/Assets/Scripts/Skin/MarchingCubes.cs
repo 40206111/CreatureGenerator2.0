@@ -75,16 +75,26 @@ public class MarchingCubes
                     Vector3 cubeOrigin = new Vector3(x, y, z) * GridDivisions;
                     cubeOrigin = startPoint + cubeOrigin;
                     float halfDiv = GridDivisions * 0.5f;
-                    //float dist = ((cubeOrigin + new Vector3(halfDiv, halfDiv, halfDiv)) - point.Position).magnitude;
-                    //if (dist < rad * 0.5f)
-                    //{
-                    //    //z = Mathf.FloorToInt(z + (cubeSideLenZ * 0.1f));
-                    //    continue;
-                    //}
-                    //if (dist > rad * 1.7f)
-                    //{
-                    //    continue;
-                    //}
+                    float multX = x >= cubeSideLenX * 0.5f ? 0 : 1;
+                    float multY = y >= cubeSideLenY * 0.5f ? 0 : 1;
+                    float multZ = z >= cubeSideLenZ * 0.5f ? 0 : 1;
+                    Vector3 toCentreVector = new Vector3(GridDivisions * multX, GridDivisions * multY, GridDivisions * multZ);
+                    Vector3 awayFromCentreVector = new Vector3(GridDivisions, GridDivisions, GridDivisions) - toCentreVector;
+                    Vector3 CubeCenter = cubeOrigin + toCentreVector;
+                    Vector3 CubeOuter = cubeOrigin + awayFromCentreVector;
+                    float distIn = (CubeCenter - point.Position).magnitude;
+                    float distOut = (CubeOuter - point.Position).magnitude;
+                    //if (TimDebugsThings.Instance != null)
+                    //    TimDebugsThings.Instance?.AddVisualCubeCenters(CubeCenter);
+                    if (distOut < rad * 0.9f)
+                    {
+                        //z = Mathf.FloorToInt(z + (cubeSideLenZ * 0.75f));
+                        continue;
+                    }
+                    if (distIn > rad * 1.1f)
+                    {
+                        continue;
+                    }
                     //Task.Run(() => MakeGridCube(startPoint, point, data));
                     var newData = MakeGridCube(cubeOrigin, point);
                     int curVertLen = meshData.Vertices.Count;

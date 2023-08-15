@@ -58,6 +58,7 @@ public class TimDebugsThings : MonoBehaviour
     List<MeshRenderer> Spheres = new List<MeshRenderer>();
     Transform SpawnedStart;
     Transform SpawnedEnd;
+    List<Transform> CubeCenters = new List<Transform>();
 
     private void Update()
     {
@@ -134,6 +135,11 @@ public class TimDebugsThings : MonoBehaviour
         {
             Destroy(SpawnedEnd.gameObject);
         }
+        for (int i = 0; i < CubeCenters.Count; ++i)
+        {
+            Destroy(CubeCenters[i].gameObject);
+        }
+        CubeCenters.Clear();
         Cubes = new List<CubeData>();
     }
     public void VisualUpdateCube(CubeData cube)
@@ -152,5 +158,12 @@ public class TimDebugsThings : MonoBehaviour
         SpawnedStart.localScale = Vector3.one * 0.3f;
         SpawnedEnd = Instantiate(Sphere, end, Quaternion.identity, this.transform);
         SpawnedEnd.localScale = Vector3.one * 0.3f;
+    }
+
+
+    public void AddVisualCubeCenters(Vector3 point)
+    {
+        CubeCenters.Add(Instantiate(Sphere, point, Quaternion.identity, this.transform));
+        CubeCenters[CubeCenters.Count - 1].localScale = Vector3.one * 0.3f;
     }
 }
