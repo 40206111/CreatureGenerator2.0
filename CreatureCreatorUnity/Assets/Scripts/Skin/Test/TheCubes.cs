@@ -22,6 +22,8 @@ public class TheCubes : MonoBehaviour
 
     Mesh TheMesh;
 
+    protected MarchingCubes CubeMaker = new MarchingCubes();
+
     private void Awake()
     {
         TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
@@ -51,7 +53,7 @@ public class TheCubes : MonoBehaviour
 
     void UpdateMesh()
     {
-        var meshData = MarchingCubes.GetMeshDataForCube(TestCube);
+        var meshData = CubeMaker.GetMeshDataForCube(TestCube);
         TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
         if (meshData.Vertices.Count > 0)
         {
