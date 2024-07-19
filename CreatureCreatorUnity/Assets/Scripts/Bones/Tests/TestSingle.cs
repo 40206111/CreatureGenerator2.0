@@ -30,16 +30,11 @@ public class TestSingle : MonoBehaviour
         {
             Awake();
         }
-        var skelePoint = SkeleBones.SkelePoints[0];
-        if(skelePoint.Position != transform.position)
-        {
-            skelePoint.Position = transform.position;
-            UpdateMesh();
-        }
+        Data.MyUpdate();
 
-        if (skelePoint.Radius != Data.Radius)
+        if(Data.CauseUpdate)
         {
-            skelePoint.Radius = Data.Radius;
+            SkeleBones.SkelePoints[0] = Data.Data;
             UpdateMesh();
         }
 
@@ -48,7 +43,6 @@ public class TestSingle : MonoBehaviour
             SkeleBones.TestUpdateGridDivisions(GridDivisions);
             UpdateMesh();
         }
-        SkeleBones.SkelePoints[0] = skelePoint;
     }
 
     void UpdateMesh()
@@ -74,27 +68,5 @@ public class TestSingle : MonoBehaviour
         {
             Update();
         }
-
-
-        Gizmos.color = Color.red;
-        Vector3 endPosX = transform.position;
-        endPosX.x -= Data.Radius;
-        Gizmos.DrawLine(transform.position, endPosX);
-        //Y
-        Gizmos.color = Color.green;
-        Vector3 endPosY = transform.position;
-        endPosY.y -= Data.Radius;
-        Gizmos.DrawLine(transform.position, endPosY);
-        //Z
-        Gizmos.color = Color.blue;
-        Vector3 endPosZ = transform.position;
-        endPosZ.z -= Data.Radius;
-        Gizmos.DrawLine(transform.position, endPosZ);
-
-        Gizmos.color = Color.grey;
-        float diameter = Data.Radius * 2f;
-        Gizmos.DrawWireCube(transform.position, new Vector3(diameter, diameter, diameter));
-
-        Gizmos.DrawWireSphere(transform.position, Data.Radius);
     }
 }

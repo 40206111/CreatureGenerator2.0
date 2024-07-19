@@ -108,7 +108,7 @@ public class MarchingCubes
 
         for (int i = 0; i < data.Length; ++i)
         {
-            data[i].IsInSphere = (data[i].Position - point.Position).magnitude + GridDivisions * 0.1f <= point.Radius;
+            data[i].IsInSphere = IsInAnyConnectedPoint(data[i], point);
         }
 
         CubeData cube = new CubeData(data);
@@ -117,6 +117,21 @@ public class MarchingCubes
             TimDebugsThings.Instance.VisualUpdateCube(cube);
         }
         return GetMeshDataForCube(cube);
+    }
+
+    bool IsInAnyConnectedPoint(PointData vertex, SkeletonPointData skelePoint)
+    {
+        bool output = (vertex.Position - skelePoint.Position).magnitude + GridDivisions * 0.1f <= skelePoint.Radius;
+        for (int i = 0; i < skelePoint.Neigbours.Count; ++i)
+        {
+            if (output == true)
+            {
+                return output;
+            }
+            output = (vertex.Position - skelePoint.Neigbours[i].Position).magnitude + GridDivisions * 0.1f <= skelePoint.Neigbours[i].Radius;
+        }
+
+        return output;
     }
 
     //work out which marching cube this cube is

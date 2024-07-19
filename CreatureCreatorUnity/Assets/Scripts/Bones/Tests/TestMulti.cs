@@ -60,16 +60,12 @@ public class TestMulti : MonoBehaviour
             updateMesh = true;
         }
 
-        if (!updateMesh)
+        for (int i = 0; i < TestPoints.Count; ++i)
         {
-            for (int i = 0; i < TestPoints.Count; ++i)
+            TestPoints[i].MyUpdate();
+            if (TestPoints[i].CauseUpdate)
             {
-                TestPoints[i].MyUpdate();
-                if (TestPoints[i].CauseUpdate)
-                {
-                    updateMesh = true;
-                    break;
-                }
+                updateMesh = true;
             }
         }
 
@@ -86,8 +82,7 @@ public class TestMulti : MonoBehaviour
         for (int i = 0; i < TestPoints.Count; ++i)
         {
             var testPoint = TestPoints[i];
-            var skelepoint = new SkeletonPointData(testPoint.transform.position, testPoint.Radius);
-            SkeleBones.SkelePoints.Add(skelepoint);
+            SkeleBones.SkelePoints.Add(testPoint.Data);
         }
     }
 
@@ -106,6 +101,7 @@ public class TestMulti : MonoBehaviour
             return;
         }
 
+        bool fixNeighbours = TestPoints.Count > NumberOfPoints;
         while (TestPoints.Count > NumberOfPoints)
         {
             int lastPoint = TestPoints.Count - 1;
@@ -115,7 +111,16 @@ public class TestMulti : MonoBehaviour
             }
             TestPoints.RemoveAt(lastPoint);
         }
-
+        if (fixNeighbours)
+        {
+            for (int i = 0; i < TestPoints.Count; ++i)
+            {
+                if (TestPoints[i] != null)
+                {
+                    TestPoints[i].UpdateNeighbours();
+                }
+            }
+        }
 
         while (TestPoints.Count < NumberOfPoints)
         {
