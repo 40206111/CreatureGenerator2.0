@@ -27,7 +27,7 @@ public class MarchingCubes
             {
                 for (int j = 0; j < newData.Triangles.Count; ++j)
                 {
-                    meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
+                    meshData.Triangles.Add((curVertLen + 1) + newData.Triangles[j]);
                 }
             }
             meshData.Vertices.AddRange(newData.Vertices);
