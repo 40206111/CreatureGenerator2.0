@@ -13,4 +13,10 @@ public class SkeletonPointData
     public float Radius;
     //public List<SkeletonPointData> Neigbours; expect to use this for full body gen 
 
+    public SkeletonPointData() { }
+    public SkeletonPointData(Vector3 pos, float rad)
+    {
+        Position = pos;
+        Radius = rad;
+    }
 }
