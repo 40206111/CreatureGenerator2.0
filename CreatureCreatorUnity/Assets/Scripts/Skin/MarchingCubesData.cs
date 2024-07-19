@@ -2,8 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// All data associated with marching cubes
+/// </summary>
 public class MarchingCubesData
 {
+    //For a cube at pos (0,0,0) these are the points in the center of the cube edges
     static public Vector3[] EdgeCentres = new Vector3[]
     {
         new Vector3(0.5f,   0f,     1f),    //0
@@ -20,6 +24,12 @@ public class MarchingCubesData
         new Vector3(0f,     0.5f,   0f),    //11
     };
 
+    /*This triangle data incompasses all marching cube variations
+     * the ints in List is an index refering to the EdgeCenters array above
+     * They are in the right order to draw a mesh triangle facing the right way
+     * this means all lists should have a length that is a multiple of 3
+     * the comment shows which vertices (as indices) of a cube are within the mesh for it to use that combination
+    */
     static public List<int>[] Triangles = new List<int>[/*256*/]
     {
          new List<int>{}, //none
@@ -280,6 +290,11 @@ public class MarchingCubesData
          new List<int>{}, //255 = 7 + 6 + 5 + 4 + 3 + 2 + 1 + 0
     };                               
 
+    /* 
+     * There are 15 totally unique ways for cubes to be
+     * all other possibilities are rotations of these
+     * These Cases are used for testing
+     */
     static public bool[][] Cases = new bool[15][]
     {
         //0

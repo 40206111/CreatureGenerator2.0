@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This represents a single metaball within a skeleton
+/// I'm thinking this could probably be changed to not necisarily be a ball
+/// for better shaping
+/// </summary>
 public class SkeletonPointData
 {
     public Vector3 Position;

@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-//place on gameobject to test a single point with the marching cubes stuff
+/// <summary>
+/// place on gameobject to test a single point with the marching cubes stuff
+/// </summary>
 [RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TestSingle : MonoBehaviour
 {
@@ -47,6 +48,7 @@ public class TestSingle : MonoBehaviour
 
     void UpdateMesh()
     {
+        Debug.Log("Updating Mesh");
         SkeleBones.MakeMyMesh();
         TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
         var meshData = SkeleBones.SkeleMesh;
