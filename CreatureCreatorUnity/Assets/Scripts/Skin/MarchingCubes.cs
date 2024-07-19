@@ -32,7 +32,7 @@ public class MarchingCubes
             }
             meshData.Vertices.AddRange(newData.Vertices);
         }
-        //FixVertices(ref meshData.Vertices, ref meshData.Triangles);
+        FixVertices(ref meshData.Vertices, ref meshData.Triangles);
         return meshData;
     }
 
@@ -163,24 +163,27 @@ public class MarchingCubes
         }
     }
 
-    //this is supposed to stop reusung data but it doesn't work rn
+    //removes duplicate vertices from list
     public void FixVertices(ref List<Vector3> vertices, ref List<int> triangles)
     {
         Dictionary<Vector3, int> outputDic = new Dictionary<Vector3, int>();
+        var newVerts = new List<Vector3>();
 
         for (int i = 0; i < triangles.Count; ++i)
         {
-            var vector = MarchingCubesData.EdgeCentres[triangles[i]];
+            var vector = vertices[triangles[i]];
             if (outputDic.ContainsKey(vector))
             {
                 triangles[i] = outputDic[vector];
             }
             else
             {
-                vertices.Add(vector);
-                outputDic.Add(vector, vertices.Count - 1);
+                newVerts.Add(vector);
+                outputDic.Add(vector, newVerts.Count - 1);
                 triangles[i] = outputDic[vector];
             }
         }
+        vertices.Clear();
+        vertices.AddRange(newVerts);
     }
 }
