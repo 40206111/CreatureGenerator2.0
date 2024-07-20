@@ -146,7 +146,7 @@ public class TestMulti : MonoBehaviour
             TheMesh.triangles = meshData.Triangles.ToArray();
         }
         TheMesh.RecalculateNormals();
-        TheMesh.name = $"SkinTestSingle";
+        TheMesh.name = $"SkinTestMulti";
     }
 
     protected virtual void OnDrawGizmos()

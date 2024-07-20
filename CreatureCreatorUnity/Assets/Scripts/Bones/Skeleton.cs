@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// this is a collection of all the points that make a creature
@@ -11,6 +10,11 @@ public class Skeleton
     public List<SkeletonPointData> SkelePoints;
     public MeshData SkeleMesh;
     MarchingCubes CubeMaker;
+
+    public Skeleton()
+    {
+        SkeleMesh = new MeshData();
+    }
 
     public Skeleton(SkeletonPointData skelePoint)
     {
