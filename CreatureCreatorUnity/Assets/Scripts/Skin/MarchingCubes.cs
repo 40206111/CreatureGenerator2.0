@@ -4,10 +4,14 @@ using System.Linq;
 using UnityEngine;
 using System.Threading.Tasks;
 
+/// <summary>
+/// This class holds all methods used to generate our mesh with marching cubes
+/// </summary>
 public class MarchingCubes
 {
     public float GridDivisions = 1f; //this should not stay here
 
+    //take in skeleton data and generate a mesh
     public MeshData GenerateMeshFromSkeleton(Skeleton data)
     {
         var meshData = new MeshData();
@@ -23,15 +27,16 @@ public class MarchingCubes
             {
                 for (int j = 0; j < newData.Triangles.Count; ++j)
                 {
-                    meshData.Triangles.Add(curVertLen + newData.Triangles[j]);
+                    meshData.Triangles.Add((curVertLen + 1) + newData.Triangles[j]);
                 }
             }
             meshData.Vertices.AddRange(newData.Vertices);
         }
-        //FixVertices(ref meshData.Vertices, ref meshData.Triangles);
+        FixVertices(ref meshData.Vertices, ref meshData.Triangles);
         return meshData;
     }
 
+    //generate grid around skeleton point that mesh will be made from
     public MeshData GenerateGridFromPoint(SkeletonPointData point)
     {
         if (TimDebugsThings.Instance != null)
@@ -74,30 +79,7 @@ public class MarchingCubes
                 {
                     Vector3 cubeOrigin = new Vector3(x, y, z) * GridDivisions;
                     cubeOrigin = startPoint + cubeOrigin;
-                    float halfDiv = GridDivisions * 0.5f;
-                    float multX = x >= cubeSideLenX * 0.5f ? 0 : 1;
-                    float multY = y >= cubeSideLenY * 0.5f ? 0 : 1;
-                    float multZ = z >= cubeSideLenZ * 0.5f ? 0 : 1;
-                    Vector3 toCentreVector = new Vector3(GridDivisions * multX, GridDivisions * multY, GridDivisions * multZ);
-                    Vector3 awayFromCentreVector = new Vector3(GridDivisions, GridDivisions, GridDivisions) - toCentreVector;
-                    Vector3 CubeCenter = cubeOrigin + toCentreVector;
-                    Vector3 CubeOuter = cubeOrigin + awayFromCentreVector;
-                    float distIn = (CubeCenter - point.Position).magnitude;
-                    float distOut = (CubeOuter - point.Position).magnitude;
-                    //if (TimDebugsThings.Instance != null)
-                    //    TimDebugsThings.Instance?.AddVisualCubeCenters(CubeCenter);
-                    if (distOut < rad * 0.9f)
-                    {
-                        //z = Mathf.FloorToInt(z + (cubeSideLenZ * 0.75f));
-                        continue;
-                    }
-                    if (distIn > rad * 1.1f)
-                    {
-                        continue;
-                    }
-                    //Task.Run(() => MakeGridCube(startPoint, point, data));
                     var newData = MakeGridCube(cubeOrigin, point);
-                    int curVertLen = meshData.Vertices.Count;
                     AddTriangles(ref meshData, newData.Triangles, newData.Vertices);
                 }
             }
@@ -106,6 +88,7 @@ public class MarchingCubes
         return meshData;
     }
 
+    //make cube of appropriate point data
     MeshData MakeGridCube(Vector3 startingPoint, SkeletonPointData point)
     {
         float x = startingPoint.x;
@@ -125,7 +108,7 @@ public class MarchingCubes
 
         for (int i = 0; i < data.Length; ++i)
         {
-            data[i].IsInSphere = (data[i].Position - point.Position).magnitude + GridDivisions * 0.1f <= point.Radius;
+            data[i].IsInSphere = IsInAnyConnectedPoint(data[i], point);
         }
 
         CubeData cube = new CubeData(data);
@@ -136,6 +119,22 @@ public class MarchingCubes
         return GetMeshDataForCube(cube);
     }
 
+    bool IsInAnyConnectedPoint(PointData vertex, SkeletonPointData skelePoint)
+    {
+        bool output = (vertex.Position - skelePoint.Position).magnitude + GridDivisions * 0.1f <= skelePoint.Radius;
+        for (int i = 0; i < skelePoint.Neigbours.Count; ++i)
+        {
+            if (output == true)
+            {
+                return output;
+            }
+            output = (vertex.Position - skelePoint.Neigbours[i].Position).magnitude + GridDivisions * 0.1f <= skelePoint.Neigbours[i].Radius;
+        }
+
+        return output;
+    }
+
+    //work out which marching cube this cube is
     public MeshData GetMeshDataForCube(CubeData cube)
     {
         int TrianglesIndex = 0;
@@ -149,7 +148,6 @@ public class MarchingCubes
         TrianglesIndex = cube.Data[7].IsInSphere ? TrianglesIndex | 128 : TrianglesIndex;
         var triangles = new List<int>(MarchingCubesData.Triangles[TrianglesIndex]);
         var vertices = GetVerticesModifiedByPosition(cube);
-        //FixVertices(ref vertices, ref triangles);
         MeshData output = new MeshData(vertices, triangles);
         return output;
     }
@@ -180,23 +178,27 @@ public class MarchingCubes
         }
     }
 
+    //removes duplicate vertices from list
     public void FixVertices(ref List<Vector3> vertices, ref List<int> triangles)
     {
         Dictionary<Vector3, int> outputDic = new Dictionary<Vector3, int>();
+        var newVerts = new List<Vector3>();
 
         for (int i = 0; i < triangles.Count; ++i)
         {
-            var vector = MarchingCubesData.EdgeCentres[triangles[i]];
+            var vector = vertices[triangles[i]];
             if (outputDic.ContainsKey(vector))
             {
                 triangles[i] = outputDic[vector];
             }
             else
             {
-                vertices.Add(vector);
-                outputDic.Add(vector, vertices.Count - 1);
+                newVerts.Add(vector);
+                outputDic.Add(vector, newVerts.Count - 1);
                 triangles[i] = outputDic[vector];
             }
         }
+        vertices.Clear();
+        vertices.AddRange(newVerts);
     }
 }

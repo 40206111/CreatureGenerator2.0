@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This component is used to test that the marching cube combinations are working as expected
+/// </summary>
+
 [RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TheCubes : MonoBehaviour
 {

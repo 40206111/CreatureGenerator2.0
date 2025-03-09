@@ -1,15 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-//place on gameobject to test a single point with the marching cubes stuff
-[RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
+/// <summary>
+/// place on gameobject to test a single point with the marching cubes stuff
+/// </summary>
+[RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer)), RequireComponent(typeof(TestSingleData))]
 public class TestSingle : MonoBehaviour
 {
     [SerializeField]
-    float Radius;
-    [SerializeField]
     float GridDivisions;
+
+    TestSingleData Data;
 
     Skeleton SkeleBones = new Skeleton(new SkeletonPointData());
 
@@ -18,22 +19,22 @@ public class TestSingle : MonoBehaviour
     private void Awake()
     {
         TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
+        Data = GetComponent<TestSingleData>();
         TheMesh.name = "Skin";
         UpdateMesh();
     }
 
     void Update()
     {
-        var skelePoint = SkeleBones.SkelePoints[0];
-        if(skelePoint.Position != transform.position)
+        if (Data == null)
         {
-            skelePoint.Position = transform.position;
-            UpdateMesh();
+            Awake();
         }
+        Data.MyUpdate();
 
-        if (skelePoint.Radius != Radius)
+        if(Data.CauseUpdate)
         {
-            skelePoint.Radius = Radius;
+            SkeleBones.SkelePoints[0] = Data.Data;
             UpdateMesh();
         }
 
@@ -42,11 +43,11 @@ public class TestSingle : MonoBehaviour
             SkeleBones.TestUpdateGridDivisions(GridDivisions);
             UpdateMesh();
         }
-        SkeleBones.SkelePoints[0] = skelePoint;
     }
 
     void UpdateMesh()
     {
+        Debug.Log("Updating Mesh");
         SkeleBones.MakeMyMesh();
         TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
         var meshData = SkeleBones.SkeleMesh;
@@ -67,27 +68,5 @@ public class TestSingle : MonoBehaviour
         {
             Update();
         }
-
-
-        Gizmos.color = Color.red;
-        Vector3 endPosX = transform.position;
-        endPosX.x -= Radius;
-        Gizmos.DrawLine(transform.position, endPosX);
-        //Y
-        Gizmos.color = Color.green;
-        Vector3 endPosY = transform.position;
-        endPosY.y -= Radius;
-        Gizmos.DrawLine(transform.position, endPosY);
-        //Z
-        Gizmos.color = Color.blue;
-        Vector3 endPosZ = transform.position;
-        endPosZ.z -= Radius;
-        Gizmos.DrawLine(transform.position, endPosZ);
-
-        Gizmos.color = Color.grey;
-        float diameter = Radius * 2f;
-        Gizmos.DrawWireCube(transform.position, new Vector3(diameter, diameter, diameter));
-
-        Gizmos.DrawWireSphere(transform.position, Radius);
     }
 }

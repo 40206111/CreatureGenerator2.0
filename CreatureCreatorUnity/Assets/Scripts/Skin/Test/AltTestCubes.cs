@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// this was used to test the marching cube's data worked right, I don't remember why it's helpful
+/// </summary>
 [RequireComponent(typeof(MeshFilter))]
 public class AltTestCubes : TheCubes
 {
