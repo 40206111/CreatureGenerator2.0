@@ -1,0 +1,16 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SkinKernal
+
+struct PointData
+{
+	float3 pos;
+	float rad;
+};
+
+StructuredBuffer<PointData> _SkelePoints;
+
+[numthreads(8,8,1)]
+void SkinKernal(uint3 id : SV_DispatchThreadID)
+{
+
+}
