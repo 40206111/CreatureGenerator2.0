@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 struct SkelePointData
 {
@@ -23,8 +24,11 @@ struct GpuCubeData
 [RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TestGPUSkinGen : MonoBehaviour
 {
+    [SerializeField, FormerlySerializedAs("_computeShader")]
+    ComputeShader _skinGridComputeShader;
+    
     [SerializeField]
-    ComputeShader _computeShader;
+    ComputeShader _skinComputeShader;
 
     [SerializeField]
     TestSingleData DataPrefab;
@@ -51,7 +55,6 @@ public class TestGPUSkinGen : MonoBehaviour
     List<TestSingleData> TestPoints = new List<TestSingleData>();
 
     List<SkelePointData> _skelePoints = new List<SkelePointData>();
-    List<GpuCubeData> _marchingCubes =  new List<GpuCubeData>();
 
     Mesh TheMesh;
 
@@ -192,15 +195,16 @@ public class TestGPUSkinGen : MonoBehaviour
         {
             _mcBuffer = new ComputeBuffer(maxMarchingCubes, (4 * sizeof(float)) * 8);
         }
+        var skinGridKernel = _skinGridComputeShader.FindKernel("SkinGridKernal");
         _pointsBuffer.SetData(_skelePoints);
-        _computeShader.SetBuffer(0, _pointsId, _pointsBuffer);
-        _computeShader.SetBuffer(0, _mcId, _mcBuffer);
-        _computeShader.SetFloat( _gridDivId, GridDivisions );
-        _computeShader.Dispatch(0, 8, 8, 1);
-        var marchingCubes = new GpuCubeData[maxMarchingCubes];
-        _mcBuffer.GetData(marchingCubes);
-        _marchingCubes.Clear();
-        _marchingCubes.AddRange(marchingCubes);
+        _skinGridComputeShader.SetBuffer(skinGridKernel, _pointsId, _pointsBuffer);
+        _skinGridComputeShader.SetBuffer(skinGridKernel, _mcId, _mcBuffer);
+        _skinGridComputeShader.SetFloat( _gridDivId, GridDivisions );
+        _skinGridComputeShader.Dispatch(skinGridKernel, 8, 8, 1);
+
+        //skin calculations
+        var skinKernel = _skinComputeShader.FindKernel("SkinKernel");
+        _skinComputeShader.SetBuffer(skinKernel, _mcId, _mcBuffer);
         //_marchingCubes.AddRange(marchingCubes);
         //SkeleBones.MakeMyMesh();
         //TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
