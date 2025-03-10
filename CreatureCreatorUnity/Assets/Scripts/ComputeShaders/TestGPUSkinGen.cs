@@ -44,9 +44,13 @@ public class TestGPUSkinGen : MonoBehaviour
 
     ComputeBuffer _pointsBuffer;
     ComputeBuffer _mcBuffer;
+    ComputeBuffer _verticesBuffer;
+    ComputeBuffer _trianglesBuffer;
     static readonly int _pointsId = Shader.PropertyToID("_SkelePoints");
     static readonly int _gridDivId = Shader.PropertyToID("_GridDivisions");
     static readonly int _mcId = Shader.PropertyToID("_MarchingCubes");
+    static readonly int _verticesId = Shader.PropertyToID("_Vertices");
+    static readonly int _trianglesId = Shader.PropertyToID("_Triangles");
 
     readonly int maxSkeletonPoints = 100;
     readonly int maxMarchingCubes = 100000;
@@ -67,21 +71,23 @@ public class TestGPUSkinGen : MonoBehaviour
 
         _pointsBuffer = new ComputeBuffer(maxSkeletonPoints, 4 * sizeof(float));
         _mcBuffer = new ComputeBuffer(maxMarchingCubes, (4 * sizeof(float)) * 8);
+        _verticesBuffer = new ComputeBuffer(maxMarchingCubes, (3 * sizeof(float)));
+        _trianglesBuffer = new ComputeBuffer(maxMarchingCubes, (sizeof(int)));
         UpdateMesh();
     }
 
     private void OnDisable()
     {
-        _pointsBuffer.Release();
-        _mcBuffer.Release();
+        _pointsBuffer?.Release();
+        _mcBuffer?.Release();
         _pointsBuffer = null;
         _mcBuffer = null;
     }
 
     private void OnDestroy()
     {
-        _pointsBuffer.Release();
-        _mcBuffer.Release();
+        _pointsBuffer?.Release();
+        _mcBuffer?.Release();
         _pointsBuffer = null;
         _mcBuffer = null;
     }
@@ -195,6 +201,14 @@ public class TestGPUSkinGen : MonoBehaviour
         {
             _mcBuffer = new ComputeBuffer(maxMarchingCubes, (4 * sizeof(float)) * 8);
         }
+        if (_verticesBuffer == null)
+        {
+            _verticesBuffer = new ComputeBuffer(maxMarchingCubes, (3 * sizeof(float)));
+        }
+        if (_trianglesBuffer == null)
+        {
+            _trianglesBuffer = new ComputeBuffer(maxMarchingCubes, (sizeof(int)));
+        }
         var skinGridKernel = _skinGridComputeShader.FindKernel("SkinGridKernal");
         _pointsBuffer.SetData(_skelePoints);
         _skinGridComputeShader.SetBuffer(skinGridKernel, _pointsId, _pointsBuffer);
@@ -205,6 +219,10 @@ public class TestGPUSkinGen : MonoBehaviour
         //skin calculations
         var skinKernel = _skinComputeShader.FindKernel("SkinKernel");
         _skinComputeShader.SetBuffer(skinKernel, _mcId, _mcBuffer);
+        _skinComputeShader.SetBuffer(skinKernel, _verticesId, _verticesBuffer);
+        _skinComputeShader.SetBuffer(skinKernel, _trianglesId, _trianglesBuffer);
+        _skinComputeShader.SetFloat( _gridDivId, GridDivisions );
+        _skinComputeShader.Dispatch(skinGridKernel, 8, 8, 1);
         //_marchingCubes.AddRange(marchingCubes);
         //SkeleBones.MakeMyMesh();
         //TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
@@ -224,7 +242,7 @@ public class TestGPUSkinGen : MonoBehaviour
     {
         if (!Application.isPlaying)
         {
-            Update();
+            //Update();
         }
     }
 

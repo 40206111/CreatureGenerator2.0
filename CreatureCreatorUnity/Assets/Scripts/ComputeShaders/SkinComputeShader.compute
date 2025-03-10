@@ -25,7 +25,7 @@ float3 EdgeCentres[12] =
  * this means all lists should have a length that is a multiple of 3
  * the comment shows which vertices (as indices) of a cube are within the mesh for it to use that combination
 */
-int[256][16] Triangles =
+int PreDefinedTriangles[256][16] =
 {
 	{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0}, //none
 	{ 8, 0, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3}, //1 = 0 
@@ -299,12 +299,46 @@ struct CubeData
 
 //Input
 StructuredBuffer<CubeData> _MarchingCubes;
+float _GridDivisions;
 
 //Output
 RWStructuredBuffer<float3> _Vertices;
 RWStructuredBuffer<int> _Triangles;
 
 [numthreads(8, 8, 1)]
-void SkinKernel(uint3 id : SV_DispatchThreadID)
+void SkinKernel(uint id : SV_DispatchThreadID)
 {
+	CubeData cube = _MarchingCubes[id];
+
+	int TrianglesIndex = 0;
+	TrianglesIndex += cube.cubeVertex1.w * 1;
+	TrianglesIndex += cube.cubeVertex2.w * 2;
+	TrianglesIndex += cube.cubeVertex3.w * 4;
+	TrianglesIndex += cube.cubeVertex4.w * 8;
+	TrianglesIndex += cube.cubeVertex5.w * 16;
+	TrianglesIndex += cube.cubeVertex6.w * 32;
+	TrianglesIndex += cube.cubeVertex7.w * 64;
+	TrianglesIndex += cube.cubeVertex8.w * 128;
+	int neededTris[16] = PreDefinedTriangles[TrianglesIndex];
+
+	for (int i = 0; i <= neededTris[15]; ++i)
+	{ 
+	}
+
+	uint startingIndex = id * 16;
+	float3 vertex = (EdgeCentres[0] * _GridDivisions) * cube.cubeVertex3.xyz;
+	_Triangles[id] = 0;
+	vertex = (EdgeCentres[1] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[2] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[3] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[4] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[5] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[6] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[7] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[8] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[9] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[10] * _GridDivisions) * cube.cubeVertex3.xyz;
+	vertex = (EdgeCentres[11] * _GridDivisions) * cube.cubeVertex3.xyz;
+
+	//MeshData output = new MeshData(vertices, triangles);
 }
