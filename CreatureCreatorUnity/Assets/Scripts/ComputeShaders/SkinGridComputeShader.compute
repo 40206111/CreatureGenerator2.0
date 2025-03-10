@@ -1,5 +1,5 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel SkinKernal
+#pragma kernel SkinGridKernal
 
 struct PointData
 {
@@ -97,7 +97,7 @@ void CreateGrid(PointData pointData)
 }
 
 [numthreads(8,8,1)]
-void SkinKernal(uint id : SV_DispatchThreadID)
+void SkinGridKernal(uint id : SV_DispatchThreadID)
 {
     PointData pointData = _SkelePoints[id];
 	CreateGrid( pointData );
