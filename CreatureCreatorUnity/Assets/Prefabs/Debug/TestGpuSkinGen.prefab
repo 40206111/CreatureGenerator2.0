@@ -238,5 +238,5 @@ MonoBehaviour:
   _computeShader: {fileID: 7200000, guid: 6c6b881ae294f3a4e8c1afaeabeac341, type: 3}
   DataPrefab: {fileID: 5380695656826126721, guid: f85be12913626a34a91badb77da267f9, type: 3}
   NumberOfPoints: 3
-  GridDivisions: 0
+  GridDivisions: 0.2
   ForceUpdate: 0

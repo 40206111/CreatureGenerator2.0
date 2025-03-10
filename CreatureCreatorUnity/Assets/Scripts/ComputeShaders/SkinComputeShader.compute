@@ -7,15 +7,16 @@ struct PointData
 	float rad;
 };
 
-struct CubeVertexData
-{
-	float3 pos;
-	bool isInSphere;
-};
-
 struct CubeData
 {
-	CubeVertexData cubeCorners[8];
+    float4 cubeVertex1;
+    float4 cubeVertex2;
+    float4 cubeVertex3;
+    float4 cubeVertex4;
+    float4 cubeVertex5;
+    float4 cubeVertex6;
+    float4 cubeVertex7;
+    float4 cubeVertex8;
 };
 
 RWStructuredBuffer<CubeData> _MarchingCubes;
@@ -24,29 +25,35 @@ StructuredBuffer<PointData> _SkelePoints;
 
 float _GridDivisions;
 
+float GetIsInSphere(float3 vertex, PointData skelePoint)
+{
+    return length(vertex - skelePoint.pos) + _GridDivisions * 0.1f <= skelePoint.rad;
+}
+
 CubeData MakeGridCube(float3 startingPoint, PointData pointData)
 {
     float x = startingPoint.x;
     float y = startingPoint.y;
     float z = startingPoint.z;
-    CubeData cube;
-    cube.cubeCorners[0].pos = float3(x, y, z + _GridDivisions);
-    cube.cubeCorners[1].pos = float3(x + _GridDivisions, y, z + _GridDivisions);
-    cube.cubeCorners[2].pos = float3(x + _GridDivisions, y, z);
-    cube.cubeCorners[3].pos = float3(startingPoint);
-    cube.cubeCorners[4].pos = float3(x, y + _GridDivisions, z + _GridDivisions);
-    cube.cubeCorners[5].pos = float3(x + _GridDivisions, y + _GridDivisions, z + _GridDivisions);
-    cube.cubeCorners[6].pos = float3(x + _GridDivisions, y + _GridDivisions, z);
-    cube.cubeCorners[7].pos = float3(x, y + _GridDivisions, z);
+    float3 cubePositions[8];
+    cubePositions[0] = float3(x, y, z + _GridDivisions);
+    cubePositions[1] = float3(x + _GridDivisions, y, z + _GridDivisions);
+    cubePositions[2] = float3(x + _GridDivisions, y, z);
+    cubePositions[3] = float3(startingPoint);
+    cubePositions[4] = float3(x, y + _GridDivisions, z + _GridDivisions);
+    cubePositions[5] = float3(x + _GridDivisions, y + _GridDivisions, z + _GridDivisions);
+    cubePositions[6] = float3(x + _GridDivisions, y + _GridDivisions, z);
+    cubePositions[7] = float3(x, y + _GridDivisions, z);
 
-    cube.cubeCorners[0].isInSphere = length(cube.cubeCorners[0].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[1].isInSphere = length(cube.cubeCorners[1].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[2].isInSphere = length(cube.cubeCorners[2].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[3].isInSphere = length(cube.cubeCorners[3].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[4].isInSphere = length(cube.cubeCorners[4].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[5].isInSphere = length(cube.cubeCorners[5].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[6].isInSphere = length(cube.cubeCorners[6].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
-    cube.cubeCorners[7].isInSphere = length(cube.cubeCorners[7].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    CubeData cube;
+    cube.cubeVertex1 = float4(cubePositions[0], GetIsInSphere(cubePositions[0], pointData));
+    cube.cubeVertex2 = float4(cubePositions[1], GetIsInSphere(cubePositions[1], pointData));
+    cube.cubeVertex3 = float4(cubePositions[2], GetIsInSphere(cubePositions[2], pointData));
+    cube.cubeVertex4 = float4(cubePositions[3], GetIsInSphere(cubePositions[3], pointData));
+    cube.cubeVertex5 = float4(cubePositions[4], GetIsInSphere(cubePositions[4], pointData));
+    cube.cubeVertex6 = float4(cubePositions[5], GetIsInSphere(cubePositions[5], pointData));
+    cube.cubeVertex7 = float4(cubePositions[6], GetIsInSphere(cubePositions[6], pointData));
+    cube.cubeVertex8 = float4(cubePositions[7], GetIsInSphere(cubePositions[7], pointData));
 
     return cube;
 }

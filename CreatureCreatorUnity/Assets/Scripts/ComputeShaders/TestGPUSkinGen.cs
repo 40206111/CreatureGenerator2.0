@@ -8,6 +8,18 @@ struct SkelePointData
     public float rad;
 };
 
+struct GpuCubeData
+{
+    public Vector4 cubeVertex1;
+    public Vector4 cubeVertex2;
+    public Vector4 cubeVertex3;
+    public Vector4 cubeVertex4;
+    public Vector4 cubeVertex5;
+    public Vector4 cubeVertex6;
+    public Vector4 cubeVertex7;
+    public Vector4 cubeVertex8;
+};
+
 [RequireComponent(typeof(MeshFilter)), RequireComponent(typeof(MeshRenderer))]
 public class TestGPUSkinGen : MonoBehaviour
 {
@@ -39,6 +51,7 @@ public class TestGPUSkinGen : MonoBehaviour
     List<TestSingleData> TestPoints = new List<TestSingleData>();
 
     List<SkelePointData> _skelePoints = new List<SkelePointData>();
+    List<GpuCubeData> _marchingCubes =  new List<GpuCubeData>();
 
     Mesh TheMesh;
 
@@ -48,8 +61,9 @@ public class TestGPUSkinGen : MonoBehaviour
         TheMesh.name = "Skin";
         //Test points gets reset on play, this allows us to use it in edit and play mode
         TestPoints.AddRange(GetComponentsInChildren<TestSingleData>());
+
         _pointsBuffer = new ComputeBuffer(maxSkeletonPoints, 4 * sizeof(float));
-        _mcBuffer = new ComputeBuffer(maxMarchingCubes, 4 * sizeof(float));
+        _mcBuffer = new ComputeBuffer(maxMarchingCubes, (4 * sizeof(float)) * 8);
         UpdateMesh();
     }
 
@@ -176,14 +190,18 @@ public class TestGPUSkinGen : MonoBehaviour
         }
         if (_mcBuffer == null)
         {
-            _mcBuffer = new ComputeBuffer(maxMarchingCubes, 4 * sizeof(float));
+            _mcBuffer = new ComputeBuffer(maxMarchingCubes, (4 * sizeof(float)) * 8);
         }
         _pointsBuffer.SetData(_skelePoints);
         _computeShader.SetBuffer(0, _pointsId, _pointsBuffer);
         _computeShader.SetBuffer(0, _mcId, _mcBuffer);
         _computeShader.SetFloat( _gridDivId, GridDivisions );
         _computeShader.Dispatch(0, 8, 8, 1);
-
+        var marchingCubes = new GpuCubeData[maxMarchingCubes];
+        _mcBuffer.GetData(marchingCubes);
+        _marchingCubes.Clear();
+        _marchingCubes.AddRange(marchingCubes);
+        //_marchingCubes.AddRange(marchingCubes);
         //SkeleBones.MakeMyMesh();
         //TheMesh = GetComponent<MeshFilter>().mesh = new Mesh();
         //var meshData = SkeleBones.SkeleMesh;
@@ -205,4 +223,5 @@ public class TestGPUSkinGen : MonoBehaviour
             Update();
         }
     }
+
 }
