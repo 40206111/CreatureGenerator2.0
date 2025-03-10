@@ -7,10 +7,91 @@ struct PointData
 	float rad;
 };
 
+struct CubeVertexData
+{
+	float3 pos;
+	bool isInSphere;
+};
+
+struct CubeData
+{
+	CubeVertexData cubeCorners[8];
+};
+
+RWStructuredBuffer<CubeData> _MarchingCubes;
+
 StructuredBuffer<PointData> _SkelePoints;
 
-[numthreads(8,8,1)]
-void SkinKernal(uint3 id : SV_DispatchThreadID)
-{
+float _GridDivisions;
 
+CubeData MakeGridCube(float3 startingPoint, PointData pointData)
+{
+    float x = startingPoint.x;
+    float y = startingPoint.y;
+    float z = startingPoint.z;
+    CubeData cube;
+    cube.cubeCorners[0].pos = float3(x, y, z + _GridDivisions);
+    cube.cubeCorners[1].pos = float3(x + _GridDivisions, y, z + _GridDivisions);
+    cube.cubeCorners[2].pos = float3(x + _GridDivisions, y, z);
+    cube.cubeCorners[3].pos = float3(startingPoint);
+    cube.cubeCorners[4].pos = float3(x, y + _GridDivisions, z + _GridDivisions);
+    cube.cubeCorners[5].pos = float3(x + _GridDivisions, y + _GridDivisions, z + _GridDivisions);
+    cube.cubeCorners[6].pos = float3(x + _GridDivisions, y + _GridDivisions, z);
+    cube.cubeCorners[7].pos = float3(x, y + _GridDivisions, z);
+
+    cube.cubeCorners[0].isInSphere = length(cube.cubeCorners[0].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[1].isInSphere = length(cube.cubeCorners[1].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[2].isInSphere = length(cube.cubeCorners[2].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[3].isInSphere = length(cube.cubeCorners[3].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[4].isInSphere = length(cube.cubeCorners[4].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[5].isInSphere = length(cube.cubeCorners[5].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[6].isInSphere = length(cube.cubeCorners[6].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+    cube.cubeCorners[7].isInSphere = length(cube.cubeCorners[7].pos - pointData.pos) + _GridDivisions * 0.1f <= pointData.rad;
+
+    return cube;
+}
+
+void CreateGrid(PointData pointData)
+{
+    float3 pos = pointData.pos;
+    float rad = pointData.rad;
+    float3 startPoint = float3(pos.x - rad, pos.y - rad, pos.z - rad);
+    float divisionsPerUnit = 1.0 / _GridDivisions;
+    float3 gridVec = float3(_GridDivisions, _GridDivisions, _GridDivisions);
+    startPoint.x = floor(divisionsPerUnit * startPoint.x) / divisionsPerUnit;
+    startPoint.y = floor(divisionsPerUnit * startPoint.y) / divisionsPerUnit;
+    startPoint.z = floor(divisionsPerUnit * startPoint.z) / divisionsPerUnit;
+
+    startPoint -= gridVec;
+
+    float3 endPoint = float3(pos.x + rad, pos.y + rad, pos.z + rad);
+    endPoint.x = ceil(divisionsPerUnit * endPoint.x) / divisionsPerUnit;
+    endPoint.y = ceil(divisionsPerUnit * endPoint.y) / divisionsPerUnit;
+    endPoint.z = ceil(divisionsPerUnit * endPoint.z) / divisionsPerUnit;
+
+    endPoint += gridVec;
+
+    int cubeSideLenX = (int)((endPoint.x - startPoint.x) / _GridDivisions);
+    int cubeSideLenY = (int)((endPoint.y - startPoint.y) / _GridDivisions);
+    int cubeSideLenZ = (int)((endPoint.z - startPoint.z) / _GridDivisions);
+
+    for (int x = 0; x < cubeSideLenX; ++x)
+    {
+        for (int y = 0; y < cubeSideLenY; ++y)
+        {
+            for (int z = 0; z < cubeSideLenZ; ++z)
+            {
+                float3 cubeOrigin = float3(x, y, z) * _GridDivisions;
+                cubeOrigin = startPoint + cubeOrigin;
+                _MarchingCubes[x + y * cubeSideLenX + z * cubeSideLenX * cubeSideLenY] = MakeGridCube(cubeOrigin, pointData);
+            }
+        }
+    }
+}
+
+[numthreads(8,8,1)]
+void SkinKernal(uint id : SV_DispatchThreadID)
+{
+    PointData pointData = _SkelePoints[id];
+	CreateGrid( pointData );
 }
